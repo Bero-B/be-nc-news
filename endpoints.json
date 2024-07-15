@@ -10,7 +10,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles",
+    "description": "serves an array of all articles sorted by date in a descending order",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
@@ -19,9 +19,18 @@
           "topic": "cooking",
           "author": "weegembump",
           "body": "Text from the article..",
-          "created_at": "2018-05-30T15:59:13.341Z",
+          "created_at": "2020-11-03T09:12:00.000Z",
           "votes": 0,
           "comment_count": 6
+        },
+        {
+          "title": "Article Title...",
+          "topic": "Article Topic...",
+          "author": "Article Author...",
+          "body": "Text from the article..",
+          "created_at": "2020-10-18T01:00:00.000Z",
+          "votes": 0,
+          "comment_count": 2
         }
       ]
     }
@@ -30,18 +39,17 @@
     "description": "serves an article object of the specified id",
     "queries": [],
     "exampleResponse": {
-      "article": [
+      "article":
         {
           "article_id": 1,
-          "title": "Living in the shadow of a great man",
-          "topic": "mitch",
-          "author": "butter_bridge",
-          "body": "I find this existence challenging",
+          "title": "Article Title...",
+          "topic": "Article Topic...",
+          "author": "Article Author...",
+          "body": "Article Text...",
           "created_at":  "2020-07-09T20:11:00.000Z",
-          "votes": 100,
-          "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+          "votes": 0,
+          "article_img_url": "img URL..."
         }
-      ]
     }
   }
 }
