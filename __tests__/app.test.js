@@ -41,6 +41,29 @@ describe('/api/topics', () => {
         })
     })
 })
+describe('/api/articles', () => {
+    describe('GET', () => {
+        test('GET 200: responds with an array of all article objects sorted by date in a descending order', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.articles).toHaveLength(5)
+                body.articles.forEach((article) => {
+                    expect(typeof article.article_id).toBe('number')
+                    expect(typeof article.author).toBe('string')
+                    expect(typeof article.title).toBe('string')
+                    expect(typeof article.topic).toBe('string')
+                    expect(typeof article.created_at).toBe('string')
+                    expect(typeof article.votes).toBe('number')
+                    expect(typeof article.article_img_url).toBe('string')
+                    expect(typeof article.comment_count).toBe('number')
+                })
+                expect(body.articles).toBeSortedBy("created_at", {descending: true})
+            })
+        })
+    })
+})
 describe('/api/articles/:article_id', () => {
     describe('GET', () => {
         test('GET 200: responds with an article object with the specified id', () => {
@@ -49,14 +72,14 @@ describe('/api/articles/:article_id', () => {
             .expect(200)
             .then(({body}) => {
                 expect(body.article).toMatchObject({
-                    article_id: expect.any(Number),
-                    title: expect.any(String),
-                    topic: expect.any(String),
-                    author: expect.any(String),
-                    body: expect.any(String),
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
                     created_at: expect.any(String),
-                    votes: expect.any(Number),
-                    article_img_url: expect.any(String),
+                    votes:  100,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
                 })
             })
         })
