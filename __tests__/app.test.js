@@ -13,6 +13,18 @@ afterAll(() => {
   return db.end();
 });
 
+describe('/api', () => {
+    describe('GET', () => {
+        test('GET 200: responds with a json containing all the available endpoints that can be used by the user', () => {
+            return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.endpoints).toEqual(endpoints)
+            })
+        })
+    })
+})
 describe('/api/topics', () => {
     describe('GET', () => {
         test('GET 200: responds with an array of all topic objects', () => {
@@ -29,14 +41,39 @@ describe('/api/topics', () => {
         })
     })
 })
-describe('/api', () => {
+describe('/api/articles/:article_id', () => {
     describe('GET', () => {
-        test('GET 200: responds with a json containing all the available endpoints that can be used by the user', () => {
+        test('GET 200: responds with an article object with the specified id', () => {
             return request(app)
-            .get('/api')
+            .get('/api/articles/1')
             .expect(200)
             .then(({body}) => {
-                expect(body.endpoints).toEqual(endpoints)
+                expect(body.article).toMatchObject({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                })
+            })
+        })
+        test('GET 404: responds with an error code and a relevant message when passing an article id that does not exist', () => {
+            return request(app)
+            .get('/api/articles/9000')
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe('Not Found')
+            })
+        })
+        test('GET 400: responds with an error code and a relevant message when passing an invalid article id', () => {
+            return request(app)
+            .get('/api/articles/not-a-number')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('Bad request')
             })
         })
     })
