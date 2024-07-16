@@ -263,6 +263,20 @@ describe('/api/articles/:article_id/comments', () => {
                 expect(body.msg).toBe("Bad request")
             })
         })
+        test("POST 400: responds with an error status and a relevant message when attempting to post a comment with extra fields", () => {
+            const comment =  {
+                username: "butter_bridge",
+                body: "A hungry bear doesn't dance",
+                beth: "is totally cooool"
+            }
+            return request(app)
+            .post('/api/articles/7/comments')
+            .send(comment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
         test('POST 404: responds with an error status and a relevant message when attempting to post a comment by a user that does not exist in the users table', () => {
             const comment =  {
                 username: "I DONT EXIST",
@@ -284,6 +298,31 @@ describe('/api/articles/:article_id/comments', () => {
             return request(app)
             .post('/api/articles/100/comments')
             .send(comment)
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe("Not Found")
+            })
+        })
+    })
+})
+describe('/api/comments/:comment_id', () => {
+    describe('DELETE', () => {
+        test('DELETE 204: deletes a specified comment and responds with no content', () => {
+            return request(app)
+            .delete('/api/comments/18')
+            .expect(204)
+        })
+        test('DELETE 400: responds with an error status and a relevant message when given an invalid comment id', () => {
+            return request(app)
+            .delete('/api/comments/not-a-number')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
+        test('DELETE 404: responds with an error status and a relevant message when attempting to delete a comment that does not exist', () => {
+            return request(app)
+            .delete('/api/comments/50')
             .expect(404)
             .then(({body}) => {
                 expect(body.msg).toBe("Not Found")
