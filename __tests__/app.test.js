@@ -107,6 +107,71 @@ describe('/api/articles/:article_id', () => {
             })
         })
     })
+    describe('PATCH', () => {
+        test('PATCH 200: increments the votes of the speficied article if the value in inc_votes is positive and responds with the udpated article', () => {
+            return request(app)
+            .patch("/api/articles/1")
+            .send({inc_votes: 3})
+            .expect(200)
+            .then(({body}) => {
+                expect(body.article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 103,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
+            })
+        })
+        test('PATCH 200: decrements the votes of the speficied article if the value in inc_votes is negative and responds with the udpated article', () => {
+            return request(app)
+            .patch("/api/articles/1")
+            .send({inc_votes: -20})
+            .expect(200)
+            .then(({body}) => {
+                expect(body.article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 80,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
+            })
+        })
+        test('PATCH 400: responds with an error status and a relevant message when attempting to update an article with a request body that does not contain the correct fields', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({})
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
+        test('PATCH 400: responds with an error status and a relevant message when attempting to update an article with a request body with invalid fields', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({inc_votes: "word"})
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
+        test('PATCH 404: responds with an error status and a relevant message when attempting to update an article that does not exist', () => {
+            return request(app)
+            .patch('/api/articles/100')
+            .send({inc_votes: 20})
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe("Not Found")
+            })
+        })
+    })
 })
 describe('/api/articles/:article_id/comments', () => {
     describe('GET', () => {
