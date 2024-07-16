@@ -159,6 +159,72 @@ describe('/api/articles/:article_id/comments', () => {
             })
         })
     })
+    describe('POST', () => {
+        test('POST 201: inserts a new comment to the comments table relating to the specified article and responds with the newly posted comment', () => {
+            const comment =  {
+                username: "butter_bridge",
+                body: "A hungry bear doesn't dance"
+            }
+            return request(app)
+            .post('/api/articles/7/comments')
+            .send(comment)
+            .expect(201)
+            .then(({body}) => {
+                expect(body.comment).toBe("A hungry bear doesn't dance")
+            })
+        })
+        test('POST 400: responds with an error status and a relevant message when attempting to post a comment with missing fields', () => {
+            const comment =  {
+                username: "butter_bridge",
+            }
+            return request(app)
+            .post('/api/articles/7/comments')
+            .send(comment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
+        test("POST 400: responds with an error status and a relevant message when passing an invalid article_id", () => {
+            const comment =  {
+                username: "butter_bridge",
+                body: "A hungry bear doesn't dance"
+            }
+            return request(app)
+            .post('/api/articles/not-a-number/comments')
+            .send(comment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
+            })
+        })
+        test('POST 404: responds with an error status and a relevant message when attempting to post a comment by a user that does not exist in the users table', () => {
+            const comment =  {
+                username: "I DONT EXIST",
+                body: "A hungry bear doesn't dance"
+            }
+            return request(app)
+            .post('/api/articles/100/comments')
+            .send(comment)
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe("Not Found")
+            }) 
+        })
+        test("POST 404: responds with an error status and a relevant message when attempting to post a comment to an article that does not exist", () => {
+            const comment =  {
+                username: "butter_bridge",
+                body: "A hungry bear doesn't dance"
+            }
+            return request(app)
+            .post('/api/articles/100/comments')
+            .send(comment)
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe("Not Found")
+            })
+        })
+    })
 })
 describe("invalid endpoint", () => {
     test("responds with a 404 status code and a relevant error message when given an endpoint that does not exist", () => {

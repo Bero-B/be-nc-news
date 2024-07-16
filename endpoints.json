@@ -75,5 +75,16 @@
         }
       ]
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a comment to an article and responds with the newly posted comment",
+    "queries": [],
+    "required format": {
+      "username": "Username123",
+      "body": "Hello, there!"
+    },
+    "exampleResponse": {
+      "comment": "Hello, there!"
+    }
   }
 }
