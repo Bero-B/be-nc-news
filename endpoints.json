@@ -103,5 +103,9 @@
       "votes": 20,
       "article_img_url": "img URL..."
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the specified comment with no response sent back",
+    "queries": []
   }
 }
