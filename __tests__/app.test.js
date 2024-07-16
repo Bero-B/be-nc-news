@@ -110,7 +110,7 @@ describe('/api/articles/:article_id', () => {
 })
 describe('/api/articles/:article_id/comments', () => {
     describe('GET', () => {
-        test('GET 200: responds with an array of comments for the specified article_id sorted with most recent comments first', () => {
+        test('GET 200: responds with an array of comments for the specified article_id', () => {
             return request(app)
             .get('/api/articles/3/comments')
             .expect(200)
@@ -132,6 +132,14 @@ describe('/api/articles/:article_id/comments', () => {
             .expect(200)
             .then(({body}) => {
                 expect(body.comments).toBeSorted({descending: true})
+            })
+        })
+        test('GET 200: responds with an empty array when the specified article exists but it does not contain any comments', () => {
+            return request(app)
+            .get('/api/articles/4/comments')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments).toEqual([])
             })
         })
         test('GET 404: responds with an error status and a relevant message when passed an article_id that does not exist', () => {
