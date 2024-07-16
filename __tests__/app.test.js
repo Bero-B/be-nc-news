@@ -144,13 +144,42 @@ describe('/api/articles/:article_id', () => {
                 })
             })
         })
-        test('PATCH 400: responds with an error status and a relevant message when attempting to update an article with a request body that does not contain the correct fields', () => {
+        test('PATCH 200: responds with the unchanged article, if passed a request body with no fields', () => {
             return request(app)
             .patch('/api/articles/1')
             .send({})
-            .expect(400)
+            .expect(200)
             .then(({body}) => {
-                expect(body.msg).toBe("Bad request")
+                expect(body.article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 100,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
+            })
+        })
+        test('PATCH 200: responds with the updated article based on the inc_votes field and ignores any extra fields inside the request body', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({
+                inc_votes: -20,
+                body: "something else"})
+            .expect(200)
+            .then(({body}) => {
+                expect(body.article).toMatchObject({
+                    article_id: 1,
+                    title: "Living in the shadow of a great man",
+                    topic: "mitch",
+                    author: "butter_bridge",
+                    body: "I find this existence challenging",
+                    created_at: expect.any(String),
+                    votes: 80,
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+                })
             })
         })
         test('PATCH 400: responds with an error status and a relevant message when attempting to update an article with a request body with invalid fields', () => {
@@ -169,6 +198,15 @@ describe('/api/articles/:article_id', () => {
             .expect(404)
             .then(({body}) => {
                 expect(body.msg).toBe("Not Found")
+            })
+        })
+        test('PATCH 400: responds with an error status and a relevant message when attempting to update an invalid article', () => {
+            return request(app)
+            .patch('/api/articles/not-a-number')
+            .send({inc_votes: 3})
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Bad request")
             })
         })
     })
@@ -326,6 +364,23 @@ describe('/api/comments/:comment_id', () => {
             .expect(404)
             .then(({body}) => {
                 expect(body.msg).toBe("Not Found")
+            })
+        })
+    })
+})
+describe('/api/users', () => {
+    describe('GET', () => {
+        test('GET 200: responds with an array of all user objects', () => {
+            return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.users).toHaveLength(4)
+                body.users.forEach((user) => {
+                    expect(typeof user.username).toBe('string')
+                    expect(typeof user.name).toBe('string')
+                    expect(typeof user.avatar_url).toBe('string')
+                })
             })
         })
     })

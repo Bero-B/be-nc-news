@@ -107,5 +107,22 @@
   "DELETE /api/comments/:comment_id": {
     "description": "deletes the specified comment with no response sent back",
     "queries": []
+  },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        { 
+          "username": "someUsername",
+          "name": "someName",
+          "avatar_url": "some URL" },
+        {
+          "username": "anotherUsername",
+          "name": "anotherName",
+          "avatar_url": "another URL"
+        }
+        ]
+    }
   }
 }
