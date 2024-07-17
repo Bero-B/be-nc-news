@@ -187,24 +187,42 @@ describe("/api/articles", () => {
 });
 describe("/api/articles/:article_id", () => {
   describe("GET", () => {
-    test("GET 200: responds with an article object with the specified id", () => {
+    test("GET 200: responds with an article object with the specified id with a comment_count key representing total count of comments for that article", () => {
       return request(app)
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
           expect(body.article).toMatchObject({
             article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
             created_at: expect.any(String),
-            votes: 100,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count:11
           });
         });
     });
+    test("GET 200: responds with an article object with the specified id with a comment_count key being 0 if the article does not have any comments", () => {
+        return request(app)
+          .get("/api/articles/4")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.article).toMatchObject({
+              article_id: 4,
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count:0
+            });
+          });
+      });
     test("GET 404: responds with an error code and a relevant message when passing an article id that does not exist", () => {
       return request(app)
         .get("/api/articles/9000")
