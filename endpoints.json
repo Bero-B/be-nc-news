@@ -11,7 +11,33 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles sorted by date in a descending order",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "queries": [
+      { 
+        "query": "author", 
+        "values": [] 
+      },
+      { 
+        "query": "topic", 
+        "values": ["mitch", "cats", "paper"] 
+      },
+      {
+        "query": "sort_by",
+        "values": [
+          "article_id",
+          "title",
+          "topic",
+          "author",
+          "created_at",
+          "comment_count",
+          "votes",
+          "article_img_url"
+        ]
+      },
+      { 
+        "query": "order", 
+        "values": ["asc", "desc"] 
+      }
+    ],
     "exampleResponse": {
       "articles": [
         {
@@ -20,26 +46,26 @@
           "author": "weegembump",
           "body": "Text from the article..",
           "created_at": "2020-11-03T09:12:00.000Z",
-          "votes": 0,
-          "comment_count": 6
-        },
-        {
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "body": "Text from the article..",
-          "created_at": "2020-10-18T01:00:00.000Z",
-          "votes": 0,
-          "comment_count": 2
-        },
-        {
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "body": "Text from the article..",
-          "created_at": "2020-10-18T01:00:00.000Z",
-          "votes": 0,
+          "votes": 5,
           "comment_count": 0
+        },
+        {
+          "title": "Article Title...",
+          "topic": "Article Topic...",
+          "author": "Article Author...",
+          "body": "Text from the article..",
+          "created_at": "2020-10-18T01:00:00.000Z",
+          "votes": 0,
+          "comment_count": 8
+        },
+        {
+          "title": "Article Title...",
+          "topic": "Article Topic...",
+          "author": "Article Author...",
+          "body": "Text from the article..",
+          "created_at": "2020-10-18T01:00:00.000Z",
+          "votes": 10,
+          "comment_count": 3
         }
       ]
     }
@@ -48,17 +74,16 @@
     "description": "serves an article object of the specified id",
     "queries": [],
     "exampleResponse": {
-      "article":
-        {
-          "article_id": 1,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "body": "Article Text...",
-          "created_at":  "2020-07-09T20:11:00.000Z",
-          "votes": 0,
-          "article_img_url": "img URL..."
-        }
+      "article": {
+        "article_id": 1,
+        "title": "Article Title...",
+        "topic": "Article Topic...",
+        "author": "Article Author...",
+        "body": "Article Text...",
+        "created_at": "2020-07-09T20:11:00.000Z",
+        "votes": 0,
+        "article_img_url": "img URL..."
+      }
     }
   },
   "GET /api/articles/:article_id/comments": {
@@ -72,7 +97,7 @@
           "article_id": 1,
           "author": "Comment Author...",
           "votes": 10,
-          "created_at":  "2020-09-19T23:10:00.000Z"
+          "created_at": "2020-09-19T23:10:00.000Z"
         },
         {
           "comment_id": 8,
@@ -80,7 +105,7 @@
           "article_id": 1,
           "author": "Comment Author...",
           "votes": 3,
-          "created_at":  "2020-06-20T07:24:00.000Z"
+          "created_at": "2020-06-20T07:24:00.000Z"
         }
       ]
     }
@@ -122,93 +147,17 @@
     "queries": [],
     "exampleResponse": {
       "users": [
-        { 
+        {
           "username": "someUsername",
           "name": "someName",
-          "avatar_url": "some URL" },
+          "avatar_url": "some URL"
+        },
         {
           "username": "anotherUsername",
           "name": "anotherName",
           "avatar_url": "another URL"
         }
-        ]
-    }
-  },
-  "GET /api/articles/?sort_by=": {
-    "description": "serves an array of article objects sorted by any valid column in a desc order by default",
-    "queries": ["article_id, title, topic, author, created_at, comment_count, votes, article_img_url"],
-    "exampleResponse": {
-      "articles":[ 
-        {
-          "article_id": 10,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-06-20T07:24:00.000Z",
-          "votes": 5,
-          "comment_count": 4,
-          "article_img_url": "img URL..."
-        },
-        {
-          "article_id": 9,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-06-20T07:24:00.000Z",
-          "votes": 1,
-          "comment_count": 0,
-          "article_img_url": "img URL..."
-        },
-        {
-          "article_id": 8,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-06-20T07:24:00.000Z",
-          "votes": 25,
-          "comment_count": 5,
-          "article_img_url": "img URL..."
-        }
-      ]
-    }
-  },
-  "GET /api/articles/?order=":{
-    "description": "serves an array of article objects sorted by date by default and ordered based on the order query, default being descending",
-    "queries": ["asc, desc"],
-    "exampleResponse": {
-      "articles":[ 
-        {
-          "article_id": 4,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-09-19T23:10:00.000Z",
-          "votes": 5,
-          "comment_count": 4,
-          "article_img_url": "img URL..."
-        },
-        {
-          "article_id":5,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-08-03T13:14:00.000Z",
-          "votes": 1,
-          "comment_count": 0,
-          "article_img_url": "img URL..."
-        },
-        {
-          "article_id": 7,
-          "title": "Article Title...",
-          "topic": "Article Topic...",
-          "author": "Article Author...",
-          "created_at": "2020-06-20T07:24:00.000Z",
-          "votes": 25,
-          "comment_count": 5,
-          "article_img_url": "img URL..."
-        }
       ]
     }
   }
 }
-

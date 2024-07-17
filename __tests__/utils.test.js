@@ -2,7 +2,8 @@ const {
   convertTimestampToDate,
   createRef,
   formatComments,
-  checkIfArticleExists
+  checkIfArticleExists,
+  checkIfTopicExists
 } = require("../db/seeds/utils");
 const db = require('../db/connection')
 
@@ -117,6 +118,18 @@ describe('checkIfArticleExists', () => {
   })
   test('should return false if the article does not exist', () => {
     return checkIfArticleExists(100).then((result) => {
+      expect(result).toBe(false)
+    })
+  })
+})
+describe('checkIfTopicExists', () => {
+  test('should return true if the topic exists', () => {
+    return checkIfTopicExists('mitch').then((result) => {
+      expect(result).toBe(true)
+    })
+  })
+  test('should return false if the topic does not exist', () => {
+    return checkIfTopicExists('something').then((result) => {
       expect(result).toBe(false)
     })
   })

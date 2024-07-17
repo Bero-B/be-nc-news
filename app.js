@@ -26,4 +26,3 @@ app.use(psqlErrors)
 
 
 module.exports = app
-
