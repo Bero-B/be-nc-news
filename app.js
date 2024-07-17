@@ -23,6 +23,5 @@ app.all("*", invalidEndpoint)
 app.use(customErrors)
 app.use(psqlErrors)
 
-
-
 module.exports = app
+
