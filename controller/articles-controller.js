@@ -8,7 +8,8 @@ function getArticleById (req, res, next){
     .catch(next)
 }
 function getArticles(req, res, next) {
-    selectArticles().then((articles) => {
+    const {sort_by, order} = req.query
+    selectArticles(sort_by, order).then((articles) => {
         res.status(200).send({articles})
     })
     .catch(next)
@@ -21,6 +22,7 @@ function getCommentsForArticle(req, res, next) {
     .catch(next)
 }
 function patchArticle(req, res, next) {
+
     const {article_id} = req.params
     const {inc_votes} = req.body
     updateArticle(article_id, inc_votes).then((article) => {
