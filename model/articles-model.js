@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-const {checkIfArticleExists} = require('../db/seeds/utils')
+const {checkIfArticleExists, checkIfTopicExists} = require('../db/seeds/utils')
 
 function selectArticleById(article_id){
     return db.query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
@@ -10,18 +10,34 @@ function selectArticleById(article_id){
         return rows[0]
     })
 }
-function selectArticles(sort_by = 'created_at', order = 'desc') {
+function selectArticles(sort_by = 'created_at', order = 'desc', topic) {
     const validSortBys = ["created_at", "article_id", "title", "topic", "author", "comment_count", "votes", "article_img_url"]
     const validOrder = ["asc", "desc"]
+    const queryValues = []
+    let queryString = `SELECT articles.article_id, articles.author, title, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`
+    if (topic){
+        if(!isNaN(topic)){
+            return Promise.reject({status:400, msg: "Invalid query"})
+        } else {
+            queryString += ` WHERE topic = $1`
+            queryValues.push(topic)
+        }
+    }
     if(!validSortBys.includes(sort_by)){
         return Promise.reject({status: 400, msg: "Invalid query"})
     }
     if(!validOrder.includes(order)){
         return Promise.reject({status: 400, msg: "Invalid query"})
     }
-    return db.query(`SELECT articles.article_id, articles.author, title, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`)
-    .then(({rows}) => {
-        return rows
+    queryString += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order};`
+    const allArticles = db.query(queryString, queryValues)
+    const promises = [allArticles, checkIfTopicExists(topic)]
+    return Promise.all(promises)
+    .then(([queryResult, topicResult]) => {
+        if (queryResult.rows.length === 0 & topicResult === false){
+            return Promise.reject({status: 404, msg: "Not Found"})
+        }
+        return queryResult.rows
     })
 }
 function selectCommentsForArticle(article_id) {
