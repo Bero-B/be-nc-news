@@ -48,7 +48,7 @@ describe('/api/articles', () => {
             .get('/api/articles')
             .expect(200)
             .then(({body}) => {
-                expect(body.articles).toHaveLength(5)
+                expect(body.articles).toHaveLength(13)
                 body.articles.forEach((article) => {
                     expect(typeof article.article_id).toBe('number')
                     expect(typeof article.author).toBe('string')
@@ -61,12 +61,79 @@ describe('/api/articles', () => {
                 })
             })
         })
-        test('GET 200: the array of article objects are sorted by date in a descending order', () => {
+        test('GET 200: the array of article objects are sorted by date in a descending order by default', () => {
             return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body}) => {
                 expect(body.articles).toBeSortedBy("created_at", {descending: true})
+            })
+        })
+        test('?sort_by= responds with an array of articles containing comments and their respective comment count which are sorted by any valid column (article_id, title, topic, author, created_at, comment_count, votes, article_img_url) in a descending order by default', () => {
+            return request(app)
+            .get('/api/articles?sort_by=comment_count')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.articles).toHaveLength(13)
+                expect(body.articles).toBeSortedBy('comment_count', {descending: true})
+            })
+        })
+        test('GET 400: responds with an error status and a relevant message when passed an invalid sort_by query of the same data type', () => {
+            return request(app)
+            .get('/api/articles?sort_by=invalid_query')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Invalid query")
+            })
+        })
+        test('GET 400: responds with an error status and a relevant message when passed an invalid sort_by query of a different data type', () => {
+            return request(app)
+            .get('/api/articles?sort_by=3')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Invalid query")
+            })
+        })
+        test('?order=  responds with an array of articles containing comments and their respective comment count sorted by created_at by default and are ordered based on the order query (asc or desc - default being desc)', () => {
+            return request(app)
+            .get("/api/articles?order=asc")
+            .expect(200)
+            .then(({body}) => {
+                expect(body.articles).toHaveLength(13)
+                expect(body.articles).toBeSortedBy('created_at', {ascending:true})
+            })
+        })
+        test('GET 400: responds with an error status and a relevant message when passed an invalid order query of the same data type', () => {
+            return request(app)
+            .get('/api/articles?order=invalid_query')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Invalid query")
+            })
+        })
+        test('GET 400: responds with an error status and a relevant message when passed an invalid order query of a different data type', () => {
+            return request(app)
+            .get('/api/articles?order=3')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe("Invalid query")
+            })
+        })
+        test('?sort_by= & order= responds with an array of article objects sorted by any valid column and ordered by the given query (asc or desc)', () => {
+            return request(app)
+            .get('/api/articles?sort_by=article_id&order=asc')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.articles).toHaveLength(13)
+                expect(body.articles).toBeSortedBy('article_id', {ascending:true})
+            })
+        })
+        test('GET 400: responds with an error status and a relevant message when one or both of the queries are invalid', () => {
+            return request(app)
+            .get('/api/articles?sort_by=invalid&order=2')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('Invalid query')
             })
         })
     })
