@@ -503,6 +503,102 @@ describe("/api/comments/:comment_id", () => {
         });
     });
   });
+  describe('PATCH', () => {
+    test('PATCH 200: increments the votes of the speficied comment if the value in inc_votes is positive and responds with the udpated comment', () => {
+      return request(app)
+      .patch("/api/comments/16")
+      .send({ inc_votes: 5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          comment_id: 16,
+          body: 'This is a bad article name',
+          article_id: 6,
+          author: 'butter_bridge',
+          votes: 6,
+          created_at: expect.any(String)
+        });
+      });
+    })
+    test("PATCH 200: decrements the votes of the speficied comment if the value in inc_votes is negative and responds with the udpated comment", () => {
+      return request(app)
+        .patch("/api/comments/16")
+        .send({ inc_votes: -1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 16,
+            body: 'This is a bad article name',
+            article_id: 6,
+            author: 'butter_bridge',
+            votes: 0,
+            created_at: expect.any(String)
+          });
+        });
+    });
+    test("PATCH 200: responds with the unchanged comment, if passed a request body with no fields", () => {
+      return request(app)
+      .patch("/api/comments/16")
+      .send({})
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comment).toMatchObject({
+            comment_id: 16,
+            body: 'This is a bad article name',
+            article_id: 6,
+            author: 'butter_bridge',
+            votes: 1,
+            created_at: expect.any(String)
+        })
+      })
+    });
+    test("PATCH 200: responds with the updated comment based on the inc_votes field and ignores any extra fields inside the request body", () => {
+      return request(app)
+      .patch("/api/comments/16")
+      .send({
+        inc_votes: 5,
+        body: "something else",
+      })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          comment_id: 16,
+          body: 'This is a bad article name',
+          article_id: 6,
+          author: 'butter_bridge',
+          votes: 6,
+          created_at: expect.any(String)
+        });
+      });
+    });
+    test("PATCH 400: responds with an error status and a relevant message when attempting to update a comment with a request body with invalid fields", () => {
+      return request(app)
+        .patch("/api/comments/16")
+        .send({ inc_votes: "word" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+    test("PATCH 404: responds with an error status and a relevant message when attempting to update a comment that does not exist", () => {
+      return request(app)
+        .patch("/api/comments/100")
+        .send({ inc_votes: 20 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Not Found");
+        });
+    });
+    test("PATCH 400: responds with an error status and a relevant message when attempting to update an invalid comment", () => {
+      return request(app)
+        .patch("/api/comments/not-a-number")
+        .send({ inc_votes: 3 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+  })
 });
 describe("/api/users", () => {
   describe("GET", () => {

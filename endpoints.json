@@ -129,14 +129,16 @@
       "inc_votes": 20
     },
     "exampleResponse": {
-      "article_id": 8,
-      "title": "Article Title...",
-      "topic": "Article Topic...",
-      "author": "Article Author...",
-      "body": "Article Text...",
-      "created_at": "2020-06-20T07:24:00.000Z",
-      "votes": 20,
-      "article_img_url": "img URL..."
+      "article": {
+        "article_id": 8,
+        "title": "Article Title...",
+        "topic": "Article Topic...",
+        "author": "Article Author...",
+        "body": "Article Text...",
+        "created_at": "2020-06-20T07:24:00.000Z",
+        "votes": 20,
+        "article_img_url": "img URL..."
+      }
     }
   },
   "DELETE /api/comments/:comment_id": {
@@ -169,6 +171,23 @@
         "username": "someUsername",
         "name": "someName",
         "avatar_url": "some URL"
+      }
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates the votes of the specified comment by the value (negative or positive) given inside inc_votes",
+    "queries": [],
+    "required format": {
+      "inc_votes": 20
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 4,
+        "body": "Comment Text...",
+        "article_id": 2,
+        "author": "Comment Author...",
+        "votes": 20,
+        "created_at": "2020-06-20T07:24:00.000Z"
       }
     }
   }
