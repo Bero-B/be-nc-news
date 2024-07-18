@@ -160,5 +160,16 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object based on the specified username",
+    "queries": [],
+    "exampleResponse": {
+      "user": {
+        "username": "someUsername",
+        "name": "someName",
+        "avatar_url": "some URL"
+      }
+    }
   }
 }

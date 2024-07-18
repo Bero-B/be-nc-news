@@ -5,7 +5,7 @@ const {getArticleById, getArticles, getCommentsForArticle, patchArticle} = requi
 const {addComment, removeComment} = require('./controller/comments-controller')
 const getEndpoints = require('./controller/endpoints-controller')
 const {customErrors, psqlErrors, invalidEndpoint} = require('./error-handling')
-const {getUsers} = require('./controller/users-controller')
+const {getUsers, getUserByUsername} = require('./controller/users-controller')
 
 app.use(express.json())
 
@@ -18,6 +18,7 @@ app.post('/api/articles/:article_id/comments', addComment)
 app.patch('/api/articles/:article_id', patchArticle)
 app.delete('/api/comments/:comment_id', removeComment)
 app.get('/api/users', getUsers)
+app.get("/api/users/:username", getUserByUsername)
 
 app.all("*", invalidEndpoint)
 app.use(customErrors)
