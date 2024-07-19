@@ -12,13 +12,13 @@
   "GET /api/articles": {
     "description": "serves an array of all articles sorted by date in a descending order",
     "queries": [
-      { 
-        "query": "author", 
-        "values": [] 
+      {
+        "query": "author",
+        "values": []
       },
-      { 
-        "query": "topic", 
-        "values": ["mitch", "cats", "paper"] 
+      {
+        "query": "topic",
+        "values": ["mitch", "cats", "paper"]
       },
       {
         "query": "sort_by",
@@ -33,9 +33,9 @@
           "article_img_url"
         ]
       },
-      { 
-        "query": "order", 
-        "values": ["asc", "desc"] 
+      {
+        "query": "order",
+        "values": ["asc", "desc"]
       }
     ],
     "exampleResponse": {
@@ -188,6 +188,30 @@
         "author": "Comment Author...",
         "votes": 20,
         "created_at": "2020-06-20T07:24:00.000Z"
+      }
+    }
+  },
+  "POST /api/articles": {
+    "description": "posts an article and responds with the newly posted article (the article_img_url will default if not provided)",
+    "queries": [],
+    "required format": {
+      "author": "Username123",
+      "title": "Article Title...",
+      "body": "Article Text...",
+      "topic": "Article Topic...",
+      "article_img_url": "img URL..."
+    },
+    "exampleResponse": {
+      "article": {
+        "article_id": 2,
+        "title": "Article Title...",
+        "topic": "Article Topic...",
+        "author": "Username123",
+        "body": "Article Text...",
+        "created_at": "2020-06-20T07:24:00.000Z",
+        "votes": 0,
+        "article_img_url": "img URL...",
+        "comment_count": 0
       }
     }
   }

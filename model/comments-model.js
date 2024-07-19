@@ -1,11 +1,8 @@
 const db = require('../db/connection')
+const {checkIfArticleExists} = require('../db/seeds/utils')
 
 function insertComment(article_id, reqBody) {
     const {body, username} = reqBody
-    const reqKeys = Object.keys(reqBody)
-    if (reqKeys.length > 2){
-        return Promise.reject({status: 400, msg: "Bad request"})
-    }
     return db.query(`INSERT INTO comments (article_id, body, author) VALUES ($1, $2, $3) RETURNING*;`, [article_id, body, username])
     .then(({rows}) => {
         return rows[0].body
@@ -34,4 +31,14 @@ function updateComment(comment_id, inc_votes) {
         return rows[0]
     })
 }
-module.exports ={insertComment, deleteComment, updateComment}
+function selectCommentsForArticle(article_id) {
+    const commentsForArticle = db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC;`, [article_id])
+    const promises = [checkIfArticleExists(article_id), commentsForArticle]
+    return Promise.all(promises).then(([articleResult, queryResult]) => {
+        if (articleResult === false && queryResult.rows.length === 0){
+            return Promise.reject({status: 404, msg: "Not Found"})
+        }
+        return queryResult.rows
+    })
+ }
+module.exports = {insertComment, deleteComment, updateComment, selectCommentsForArticle}

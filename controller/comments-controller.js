@@ -1,4 +1,4 @@
-const {insertComment, deleteComment, updateComment} = require('../model/comments-model')
+const {insertComment, deleteComment, updateComment, selectCommentsForArticle} = require('../model/comments-model')
 
 function addComment(req, res, next) {
     const {article_id} = req.params
@@ -22,4 +22,11 @@ function patchComment(req, res, next) {
     })
     .catch(next)
 }
-module.exports = {addComment, removeComment, patchComment}
+function getCommentsForArticle(req, res, next) {
+    const {article_id} = req.params
+    selectCommentsForArticle(article_id).then((comments) => {
+        res.status(200).send({comments})
+    })
+    .catch(next)
+}
+module.exports = {addComment, removeComment, patchComment, getCommentsForArticle}

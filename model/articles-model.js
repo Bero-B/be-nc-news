@@ -1,5 +1,5 @@
 const db = require('../db/connection')
-const {checkIfArticleExists, checkIfTopicExists} = require('../db/seeds/utils')
+const {checkIfTopicExists} = require('../db/seeds/utils')
 
 function selectArticleById(article_id){
     return db.query(`SELECT articles.*, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;`, [article_id])
@@ -40,16 +40,6 @@ function selectArticles(sort_by = 'created_at', order = 'desc', topic) {
         return queryResult.rows
     })
 }
-function selectCommentsForArticle(article_id) {
-    const commentsForArticle = db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC;`, [article_id])
-    const promises = [checkIfArticleExists(article_id), commentsForArticle]
-    return Promise.all(promises).then(([articleResult, queryResult]) => {
-        if (articleResult === false && queryResult.rows.length === 0){
-            return Promise.reject({status: 404, msg: "Not Found"})
-        }
-        return queryResult.rows
-    })
- }
 function updateArticle(article_id, inc_votes) {
     if (!inc_votes){
         return db.query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
@@ -65,4 +55,24 @@ function updateArticle(article_id, inc_votes) {
         return rows[0]
     })
 }
-module.exports = {selectArticleById, selectArticles, selectCommentsForArticle, updateArticle}
+function insertArticle(author, title, body, topic, article_img_url) {
+    if (!article_img_url){
+        return db.query(`INSERT INTO articles (author, title, body, topic) VALUES ($1, $2, $3, $4) RETURNING*;`, [author, title, body, topic])
+        .then(({rows}) => {
+            const {article_id} = rows[0]
+            return db.query(`SELECT articles.*, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;`, [article_id])
+            .then(({rows}) => {
+                return rows[0]
+            })
+        }) 
+    }
+    return db.query(`INSERT INTO articles (author, title, body, topic, article_img_url) VALUES ($1, $2, $3, $4, $5) RETURNING*;`, [author, title, body, topic, article_img_url])
+    .then(({rows}) => {
+        const {article_id} = rows[0]
+        return db.query(`SELECT articles.*, COUNT(comment_id)::int AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;`, [article_id])
+        .then(({rows}) => {
+            return rows[0]
+        })
+    })
+}
+module.exports = {selectArticleById, selectArticles, updateArticle, insertArticle}
