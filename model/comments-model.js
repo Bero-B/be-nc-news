@@ -31,8 +31,21 @@ function updateComment(comment_id, inc_votes) {
         return rows[0]
     })
 }
-function selectCommentsForArticle(article_id) {
-    const commentsForArticle = db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC;`, [article_id])
+function selectCommentsForArticle(article_id, limit = 10, p) {
+    let queryString = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`
+    if (isNaN(limit)){
+        return Promise.reject({status: 400, msg: "Invalid query - limit and p can only be numbers"})
+    } else {
+        queryString += ` LIMIT ${limit}`
+    }
+    if (p){
+        if(isNaN(p)){
+            return Promise.reject({status: 400, msg: "Invalid query - limit and p can only be numbers"})
+        } else {
+            queryString += ` OFFSET ${limit * (p-1)};`
+        }
+    }
+    const commentsForArticle = db.query(queryString, [article_id])
     const promises = [checkIfArticleExists(article_id), commentsForArticle]
     return Promise.all(promises).then(([articleResult, queryResult]) => {
         if (articleResult === false && queryResult.rows.length === 0){

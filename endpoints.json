@@ -10,7 +10,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles sorted by date in a descending order",
+    "description": "serves an array of all articles sorted by date in a descending order and a total_count property representing total number of articles returned",
     "queries": [
       {
         "query": "author",
@@ -36,6 +36,17 @@
       {
         "query": "order",
         "values": ["asc", "desc"]
+      },
+      {
+        "query": "limit",
+        "values": ["any integer"],
+        "default value": 10,
+        "description": "The amount of results to return per page"
+      },
+      {
+        "query": "p",
+        "values": ["any integer"],
+        "description": "Which page of results to return"
       }
     ],
     "exampleResponse": {
@@ -67,7 +78,8 @@
           "votes": 10,
           "comment_count": 3
         }
-      ]
+      ],
+      "total_count": 3
     }
   },
   "GET /api/articles/:article_id": {
@@ -89,7 +101,19 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "serves an array of comments for the specified article sorted with most recent comments appearing first",
-    "queries": [],
+    "queries": [
+      {
+        "query": "limit",
+        "values": ["any integer"],
+        "default value": 10,
+        "description": "The amount of results to return per page"
+      },
+      {
+        "query": "p",
+        "values": ["any integer"],
+        "description": "Which page of results to return"
+      }
+    ],
     "exampleResponse": {
       "comments": [
         {
@@ -142,7 +166,7 @@
     }
   },
   "DELETE /api/comments/:comment_id": {
-    "description": "deletes the specified comment with no response sent back",
+    "description": "deletes the specified comment based on an id with no response sent back",
     "queries": []
   },
   "GET /api/users": {
@@ -214,5 +238,23 @@
         "comment_count": 0
       }
     }
+  },
+  "POST /api/topics": {
+    "description": "posts a new topic and responds with the newly posted topic. Description field can be omitted.",
+    "queries": [],
+    "required format": {
+      "slug": "new topic",
+      "description": "topic description..."
+    },
+    "exampleResponse": {
+      "topic": {
+        "slug": "new topic",
+        "description": "topic description..."
+      }
+    }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes the specified article based on an id and its respective comments with no response sent back",
+    "queries": []
   }
 }

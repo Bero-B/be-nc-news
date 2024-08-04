@@ -40,6 +40,81 @@ describe("/api/topics", () => {
         });
     });
   });
+  describe("POST", () => {
+    test("POST 201: responds with the newly posted topic", () => {
+      const topic = {
+        slug: "new topic",
+        description: "description for new topic"
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(topic)
+      .expect(201)
+      .then(({body}) => {
+        expect(body.topic).toMatchObject({
+          slug: "new topic",
+          description: "description for new topic"
+        })
+      })
+    })
+    test("POST 201: responds with the newly posted topic and ignores any extra fields", () => {
+      const topic = {
+        slug: "new topic",
+        description: "description for new topic",
+        extraField: "extra field"
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(topic)
+      .expect(201)
+      .then(({body}) => {
+        expect(body.topic).toMatchObject({
+          slug: "new topic",
+          description: "description for new topic"
+        })
+      })
+    })
+    test("POST 201: responds with the newly posted topic if only provided with a slug field and no description", () => {
+      const topic = {
+        slug: "new topic",
+      }
+      return request(app)
+      .post('/api/topics')
+      .send(topic)
+      .expect(201)
+      .then(({body}) => {
+        expect(body.topic).toMatchObject({
+          slug: "new topic",
+          description: null
+        })
+      })
+    })
+    test("POST 400: responds with an error status and a relevant message if the topic body contains invalid fields", () => {
+      const topic = {
+        invalidField: "invalid",
+        anotherField: "invalid"
+      }
+      return request(app)
+        .post("/api/topics")
+        .send(topic)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+    test("POST 400: responds with an error status and a relevant message if the topic body has only description field and is missing slug field", () => {
+      const topic = {
+        description: "new topic"
+      }
+      return request(app)
+        .post("/api/topics")
+        .send(topic)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    }); 
+  })
 });
 describe("/api/articles", () => {
   describe("GET", () => {
@@ -49,7 +124,7 @@ describe("/api/articles", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).toHaveLength(13);
+            expect(body.articles).toHaveLength(10);
             body.articles.forEach((article) => {
               expect(typeof article.article_id).toBe("number");
               expect(typeof article.author).toBe("string");
@@ -79,7 +154,7 @@ describe("/api/articles", () => {
           .get("/api/articles?sort_by=comment_count")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).toHaveLength(13);
+            expect(body.articles).toHaveLength(10);
             expect(body.articles).toBeSortedBy("comment_count", {
               descending: true,
             });
@@ -106,7 +181,7 @@ describe("/api/articles", () => {
           .get("/api/articles?order=asc")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).toHaveLength(13);
+            expect(body.articles).toHaveLength(10);
             expect(body.articles).toBeSortedBy("created_at", {
               ascending: true,
             });
@@ -133,7 +208,7 @@ describe("/api/articles", () => {
           .get("/api/articles?sort_by=article_id&order=asc")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).toHaveLength(13);
+            expect(body.articles).toHaveLength(10);
             expect(body.articles).toBeSortedBy("article_id", {
               ascending: true,
             });
@@ -149,12 +224,12 @@ describe("/api/articles", () => {
       });
       test("?topic= responds with an array of article objects filtered by the topic specified", () => {
         return request(app)
-          .get("/api/articles?topic=mitch")
+          .get("/api/articles?topic=cats")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).toHaveLength(12);
+            expect(body.articles).toHaveLength(1);
             body.articles.forEach((article) => {
-              expect(article.topic).toBe("mitch");
+              expect(article.topic).toBe("cats");
             });
           });
       });
@@ -180,6 +255,66 @@ describe("/api/articles", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body.msg).toBe("Not Found");
+          });
+      });
+      test("?limit= responds with an array of articles paginated based on the limit (default being 10 if not provided) with a total_count property added in to display the total number of articles returned", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toHaveLength(10);
+            expect(body.total_count).toBe(10);
+            body.articles.forEach((article) => {
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
+            });
+          });
+      });
+      test("?limit= & p= responds with an array of articles paginated based on the limit and p queries provided", () => {
+        return request(app)
+          .get("/api/articles/?limit=5&p=1")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toHaveLength(5);
+            expect(body.total_count).toBe(5);
+            body.articles.forEach((article) => {
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
+            });
+          });
+      });
+      test("?limit= & p= combined with other filter queries respond with an array of articles paginated and filtered based on the queries", () => {
+        return request(app)
+          .get("/api/articles?sort_by=article_id&order=asc&limit=5&p=1")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toHaveLength(5);
+            expect(body.total_count).toBe(5);
+            expect(body.articles).toBeSortedBy("article_id", {
+              ascending: true,
+            });
+          });
+      });
+      test("GET 400: responds with an error status and a relevant message when passed invalid limit and p", () => {
+        return request(app)
+          .get("/api/articles?limit=invalid&p=invalid")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).toBe(
+              "Invalid query - limit and p can only be numbers"
+            );
           });
       });
     });
@@ -476,6 +611,27 @@ describe("/api/articles/:article_id", () => {
         });
     });
   });
+  describe("DELETE", () => {
+    test("DELETE 204: deletes a specified article based on an id with its respective comments and responds with no content", () => {
+      return request(app).delete("/api/articles/6").expect(204);
+    });
+    test("DELETE 400: responds with an error status and a relevant message when given an invalid article id", () => {
+      return request(app)
+        .delete("/api/articles/not-a-number")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad request");
+        });
+    });
+    test("DELETE 404: responds with an error status and a relevant message when attempting to delete an article that does not exist", () => {
+      return request(app)
+        .delete("/api/articles/50")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Not Found");
+        });
+    });
+  })
 });
 describe("/api/articles/:article_id/comments", () => {
   describe("GET", () => {
@@ -525,6 +681,48 @@ describe("/api/articles/:article_id/comments", () => {
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("Bad request");
+        });
+    });
+    test("?limit= responds with an array of comments paginated based on the limit (default being 10 if not provided)", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toHaveLength(10);
+          body.comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+            expect(typeof comment.author).toBe("string");
+            expect(typeof comment.body).toBe("string");
+            expect(comment.article_id).toBe(1);
+          });
+        });
+    });
+    test("?limit= & p= responds with an array of comments paginated based on the limit and p queries provided", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5&p=1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toHaveLength(5);
+          body.comments.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+            expect(typeof comment.author).toBe("string");
+            expect(typeof comment.body).toBe("string");
+            expect(comment.article_id).toBe(1);
+          });
+        });
+    });
+    test("GET 400: responds with an error status and a relevant message when passed invalid limit and p", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=invalid&p=invalid")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe(
+            "Invalid query - limit and p can only be numbers"
+          );
         });
     });
   });

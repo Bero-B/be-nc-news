@@ -23,8 +23,9 @@ function patchComment(req, res, next) {
     .catch(next)
 }
 function getCommentsForArticle(req, res, next) {
+    const {limit, p} = req.query
     const {article_id} = req.params
-    selectCommentsForArticle(article_id).then((comments) => {
+    selectCommentsForArticle(article_id, limit, p).then((comments) => {
         res.status(200).send({comments})
     })
     .catch(next)
